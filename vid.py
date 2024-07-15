@@ -2,6 +2,12 @@ import cv2
 import os
 import face_recognition
 
+# ANSI escape sequences for terminal colors
+GREEN = '\033[92m'  # Green
+RED = '\033[91m'    # Red
+PURPLE = '\033[95m' # Purple
+RESET = '\033[0m'   # Reset color
+
 # Function to load face encodings from a specific folder
 def load_face_encodings(folder_path):
     face_encodings = []
@@ -15,7 +21,7 @@ def load_face_encodings(folder_path):
     return face_encodings
 
 # Function to process video file
-def process_video(video_path, user_face_encodings, tolerance=0.4):
+def process_video(video_path, user_face_encodings, tolerance=0.4, frame_skip=10):
     # Open the video file
     video = cv2.VideoCapture(video_path)
 
@@ -23,24 +29,21 @@ def process_video(video_path, user_face_encodings, tolerance=0.4):
         print(f"Error: Could not open video file '{video_path}'")
         return
 
-    # Get video properties
-    frame_count = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
-    fps = video.get(cv2.CAP_PROP_FPS)
-    frame_width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
-    frame_height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
     # Initialize variables
     user_name = os.path.basename(os.path.dirname(user_folder))
     known_face_encodings = user_face_encodings
-    face_locations = []
-    face_encodings = []
     process_this_frame = True
     success = True
+    frame_count = 0
 
     while success:
         success, frame = video.read()
+        frame_count += 1
 
-        if process_this_frame and success:
+        if frame_count % frame_skip != 0:  # Skip frames if not multiple of frame_skip
+            continue
+
+        if success:
             # Convert the frame to RGB
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
@@ -48,25 +51,27 @@ def process_video(video_path, user_face_encodings, tolerance=0.4):
             face_locations = face_recognition.face_locations(rgb_frame)
             face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
 
+            # Check if multiple faces are detected
+            if len(face_encodings) > 1:
+                # Print error message in purple
+                print(f"{PURPLE}Error: Multiple faces detected in frame {frame_count}{RESET}")
+            elif len(face_encodings) == 0:
+                # Print no face detected message in red
+                print(f"{RED}Error: No face detected in frame {frame_count}{RESET}")
+
             if face_encodings:
                 for face_encoding in face_encodings:
                     # Compare face encoding with known encodings
                     matches = face_recognition.compare_faces(known_face_encodings, face_encoding, tolerance=tolerance)
                     if True in matches:
-                        print(f"Face recognized: {user_folder}")
-                        # Draw a green box around the recognized face
-                        for (top, right, bottom, left) in face_locations:
-                            cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
+                        # Print positive recognition message in green
+                        print(f"{GREEN}Face recognized: {user_folder}{RESET}")
                     else:
-                        print("Face not recognized.")
-                        # Draw a red box around the unrecognized face
-                        for (top, right, bottom, left) in face_locations:
-                            cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+                        # Print negative recognition message in red
+                        print(f"{RED}Face not recognized{RESET}")
 
             # Display the frame
             cv2.imshow('Video', frame)
-
-            process_this_frame = not process_this_frame
 
         # Check if 'q' is pressed to quit
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -93,5 +98,5 @@ user_face_encodings = load_face_encodings(user_folder)
 # Ask for video file path
 video_path = input("Please enter the path to the video file: ")
 
-# Process the video file
-process_video(video_path, user_face_encodings)
+# Process the video file, checking every 10th frame
+process_video(video_path, user_face_encodings, frame_skip=10)
