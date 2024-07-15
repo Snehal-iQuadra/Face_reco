@@ -5,8 +5,7 @@ This project implements a face recognition system using Python and OpenCV. The s
 
 ## File Descriptions
 
-- `frame.py`: Captures images of a user's face and stores them in a directory for future recognition.
-- `frame.py`: Captures frames and recognizes a user's face based on stored images.
+- `frame.py`: recognizes a user's face based on stored images.
 - `frameauto.py`: Automatically captures and recognizes a user's face at regular intervals.
 - `nocam.py`: Recognizes a user's face without displaying the camera feed.
 - `vid.py`: Processes a video file to recognize faces within the video.
