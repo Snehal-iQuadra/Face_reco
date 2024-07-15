@@ -21,7 +21,7 @@ def load_face_encodings(folder_path):
     return face_encodings
 
 # Function to process video file
-def process_video(video_path, user_face_encodings, tolerance=0.4, frame_skip=10):
+def process_video(video_path, user_face_encodings, tolerance=0.4, interval_seconds=1):
     # Open the video file
     video = cv2.VideoCapture(video_path)
 
@@ -29,10 +29,17 @@ def process_video(video_path, user_face_encodings, tolerance=0.4, frame_skip=10)
         print(f"Error: Could not open video file '{video_path}'")
         return
 
+    # Get the frames per second (fps) of the video
+    fps = video.get(cv2.CAP_PROP_FPS)
+    print(f"Frames per second: {fps}")
+
+    # Calculate frame skip based on the desired interval in seconds
+    frame_skip = int((fps * interval_seconds))
+    print(f"Frame skip interval: {frame_skip} frames")
+
     # Initialize variables
     user_name = os.path.basename(os.path.dirname(user_folder))
     known_face_encodings = user_face_encodings
-    process_this_frame = True
     success = True
     frame_count = 0
 
@@ -98,5 +105,5 @@ user_face_encodings = load_face_encodings(user_folder)
 # Ask for video file path
 video_path = input("Please enter the path to the video file: ")
 
-# Process the video file, checking every 10th frame
-process_video(video_path, user_face_encodings, frame_skip=10)
+# Process the video file, checking every 1 second
+process_video(video_path, user_face_encodings, interval_seconds=1)
