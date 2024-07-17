@@ -1,6 +1,9 @@
 import cv2
 import os
 import face_recognition
+from datetime import datetime
+import time
+import subprocess
 
 # ANSI escape sequences for terminal colors
 GREEN = '\033[92m'  # Green
@@ -21,7 +24,10 @@ def load_face_encodings(folder_path):
     return face_encodings
 
 # Function to process video file
-def process_video(video_path, user_face_encodings, tolerance=0.4, interval_seconds=1):
+def process_video(video_path, user_face_encodings, tolerance=0.4):
+    # Record the start time
+    start_time = time.time()
+
     # Open the video file
     video = cv2.VideoCapture(video_path)
 
@@ -34,7 +40,7 @@ def process_video(video_path, user_face_encodings, tolerance=0.4, interval_secon
     print(f"Frames per second: {fps}")
 
     # Calculate frame skip based on the desired interval in seconds
-    frame_skip = int((fps * interval_seconds))
+    frame_skip = int(2 * fps)
     print(f"Frame skip interval: {frame_skip} frames")
 
     # Initialize variables
@@ -88,6 +94,13 @@ def process_video(video_path, user_face_encodings, tolerance=0.4, interval_secon
     video.release()
     cv2.destroyAllWindows()
 
+    # Record the end time
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+
+    # Print the time taken
+    print(f"Processing completed in: {elapsed_time:.2f} seconds")
+
 # Get the user's name
 user_name = input("Please enter your name: ")
 
@@ -105,5 +118,23 @@ user_face_encodings = load_face_encodings(user_folder)
 # Ask for video file path
 video_path = input("Please enter the path to the video file: ")
 
-# Process the video file, checking every 1 second
-process_video(video_path, user_face_encodings, interval_seconds=1)
+# Full path to the ffmpeg executable
+ffmpeg_path = r'C:\ffmpeg\bin\ffmpeg.exe'  #path to ffmpeg.exe
+
+# Create the output file name using the user's name
+output_file_name = f"{user_name}_speed.mp4"
+output_file_path = os.path.join(os.path.dirname(video_path), output_file_name)
+
+# Speed up the video and remove audio using ffmpeg
+ffmpeg_command = [
+    ffmpeg_path,
+    '-i', video_path,
+    '-filter:v', 'setpts=PTS/2',
+    '-an',  # Remove the audio
+    output_file_path
+]
+
+subprocess.run(ffmpeg_command)
+
+# Process the sped-up video file, checking every 1 second
+process_video(output_file_path, user_face_encodings)
