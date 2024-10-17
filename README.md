@@ -1,26 +1,7 @@
-# Face Recognition Project
+# Gaze Direction Estimation
 
-This project implements a face recognition system using Python and OpenCV. The system includes multiple scripts for different functionalities such as capturing frames, recognizing faces from live video feed, and processing video files.
+Independent Study Project at Stevens Institute of Technology (Fall 2022).
 
+Report can be found at [report.pdf](report.pdf)
 
-## File Descriptions
-
-- `frame.py`: recognizes a user's face based on stored images.
-- `frameauto.py`: Automatically captures and recognizes a user's face at regular intervals.
-- `nocam.py`: Recognizes a user's face without displaying the camera feed.
-- `vid.py`: Processes a video file to recognize faces within the video.
-- `haarcascade_frontalface_default.xml`:Download and place the Haar Cascade XML file in the project directory:
-    - [Haar Cascade XML file](https://github.com/opencv/opencv/tree/master/data/haarcascades)
-    - or it is included in the repository for you to use
-
-## Dependencies
-
-- Python 3.x
-- OpenCV
-- face_recognition
-- time
-- keyboard
-
-## Contributing
-
-Contributions are welcome! Please fork the repository and submit a pull request with your changes.
+Video demonstration can be found at https://youtu.be/BFOO-_9tMn4
